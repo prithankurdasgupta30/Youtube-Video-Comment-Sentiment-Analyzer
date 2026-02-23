@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YouTube Sentiment Analyzer</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #141e30, #243b55);
+            color: white;
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 40px;
+            font-size: 2.5rem;
+        }
+
+        .container {
+            margin: 40px auto;
+            width: 60%;
+            background: #1f2a38;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.4);
+        }
+
+        input {
+            width: 80%;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #ff4b2b;
+            color: white;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: #ff416c;
+        }
+
+        .results {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .card {
+            background: #2c3e50;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+
+        .positive { color: #2ecc71; }
+        .negative { color: #e74c3c; }
+        .neutral  { color: #f1c40f; }
+    </style>
+</head>
+<body>
+
+    <h1>YouTube Sentiment Analyzer</h1>
+
+    <div class="container">
+        <input type="text" id="videoId" placeholder="Enter YouTube Video ID">
+        <br>
+        <input type="number" id="maxComments" value="20" placeholder="Number of Comments">
+        <br>
+        <button onclick="analyze()">Analyze</button>
+
+        <div class="results" id="results"></div>
+    </div>
+
+<script>
+async function analyze() {
+    const videoId = document.getElementById("videoId").value;
+    const maxComments = document.getElementById("maxComments").value;
+    const resultsDiv = document.getElementById("results");
+
+    resultsDiv.innerHTML = "<p>Analyzing comments...</p>";
+
+    try {
+        const response = await fetch("/analyze_video/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                video_id: videoId,
+                max_comments: parseInt(maxComments)
+            })
+        });
+
+        const data = await response.json();
+        resultsDiv.innerHTML = "";
+
+        if (data.results) {
+            resultsDiv.innerHTML += `
+                <h3>Summary</h3>
+                <p class="positive">Positive: ${data.summary.positive}</p>
+                <p class="negative">Negative: ${data.summary.negative}</p>
+                <p class="neutral">Neutral: ${data.summary.neutral}</p>
+                <hr>
+            `;
+
+            data.results.forEach(item => {
+                let sentimentClass = item.sentiment.toLowerCase();
+
+                resultsDiv.innerHTML += `
+                    <div class="card">
+                        <p>${item.comment}</p>
+                        <strong class="${sentimentClass}">
+                            Sentiment: ${item.sentiment}
+                        </strong>
+                    </div>
+                `;
+            });
+        } else {
+            resultsDiv.innerHTML = "<p>Error fetching comments.</p>";
+        }
+
+    } catch (error) {
+        resultsDiv.innerHTML = "<p>Server error occurred.</p>";
+    }
+}
+</script>
+
+</body>
+</html>
