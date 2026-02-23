@@ -20,7 +20,7 @@ Users can enter a YouTube video ID, fetch public comments, and analyze them as *
 ## 🛠 Tech Stack
 
 - **Backend:** FastAPI (Python)
-- **Frontend:** HTML, CSS, JavaScript
+- **Frontend:** HTML, CSS
 - **API Integration:** YouTube Data API v3
 - **NLP Library:** TextBlob
 - **Server:** Uvicorn
